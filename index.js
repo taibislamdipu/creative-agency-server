@@ -38,6 +38,15 @@ client.connect(err => {
             })
     })
 
+    // read all order data from database
+    app.get('/allOrders', (req, res) => {
+        orderCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+
+
     // insert review info to database
     app.post('/addReview', (req, res) => {
         const review = req.body;
