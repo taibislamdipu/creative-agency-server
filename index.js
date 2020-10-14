@@ -23,6 +23,7 @@ client.connect(err => {
     const orderCollection = client.db("creativeAgencyDB").collection("orders");
     const reviewCollection = client.db("creativeAgencyDB").collection("reviews");
     const servicesCollection = client.db("creativeAgencyDB").collection("services");
+    const adminCollection = client.db("creativeAgencyDB").collection("adminEmail");
 
     console.log('creative network db connected successfully!!');
 
@@ -77,11 +78,21 @@ client.connect(err => {
 
     })
 
+    // read all services data from database
     app.get('/getServices', (req, res) => {
         servicesCollection.find({})
         .toArray((err, documents) => {
             res.send(documents)
         })
+    })
+
+    // insert admin email address into database
+    app.post('/adminEmail', (req, res) => {
+        const email = req.body;
+        adminCollection.insertOne(email)
+            .then((result) => {
+                res.send(result.insertedCount > 0)
+            })
     })
 
 
