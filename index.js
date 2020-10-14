@@ -50,7 +50,8 @@ client.connect(err => {
 
     // read reviews from database
     app.get('/reviews', (req, res) => {
-        reviewCollection.find({}).limit(3)
+        /*  reviewCollection.find({}).limit(3) */
+        reviewCollection.find({}).sort({ _id: -1 }).limit(3)
             .toArray((err, documents) => {
                 res.send(documents);
             })
@@ -67,14 +68,14 @@ client.connect(err => {
 
     })
 
-    /* app.post('/appointmentsByDate', (req, res) => {
-        const date = req.body;
-        console.log(date.date);
-        appointmentCollection.find({ date: date })
-            .toArray((err, documents) => {
-                res.send(documents);
-            })
-    }) */
+    app.get('/getServices', (req, res) => {
+        servicesCollection.find({})
+        .toArray((err, documents) => {
+            res.send(documents)
+        })
+    })
+
+
 });
 
 app.listen(process.env.PORT || port, console.log('Database Running on Port', port))
