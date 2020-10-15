@@ -95,6 +95,15 @@ client.connect(err => {
             })
     })
 
+    // find admin email address for access control
+    app.post('/isAdmin', (req, res) => {
+        const email = req.body.email;
+        adminCollection.find({ email: email })
+            .toArray((err, adminEmail) => {
+                res.send(adminEmail.length > 0)
+            })
+    })
+
 
 });
 
