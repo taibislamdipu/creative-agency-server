@@ -4,6 +4,8 @@ const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config();
 
+const fileUpload = require('express-fileupload');
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.is4kq.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
 const port = 5000
@@ -11,6 +13,7 @@ const port = 5000
 const app = express()
 
 app.use(bodyParser.json());
+app.use(fileUpload());
 app.use(cors());
 
 
@@ -31,12 +34,52 @@ client.connect(err => {
 
     // insert order info to database
     app.post('/addOrder', (req, res) => {
-        const order = req.body;
-        console.log(order);
-        orderCollection.insertOne(order)
+
+        const name = req.body.name;
+        const email = req.body.email;
+        const file = req.files.file;
+        const serviceName = req.body.serviceName;
+        const details = req.body.details;
+        const price = req.body.price;
+
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
+
+        var image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+
+        orderCollection.insertOne({ name, email, image, serviceName, details, price })
             .then((result) => {
                 res.send(result.insertedCount > 0)
+                console.log('order added', result);
             })
+    })
+
+    // insert new service info to database
+    app.post('/addService', (req, res) => {
+
+        const title = req.body.title;
+        const description = req.body.description;
+        const file = req.files.file;
+
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
+
+        var serviceImg = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        }
+
+        servicesCollection.insertOne({ title, description, serviceImg })
+            .then((result) => {
+                res.send(result.insertedCount > 0)
+                console.log('service added', result);
+            })
+
     })
 
     // read all order data from database
@@ -65,17 +108,6 @@ client.connect(err => {
             .toArray((err, documents) => {
                 res.send(documents);
             })
-    })
-
-    // insert new service info to database
-    app.post('/addService', (req, res) => {
-        const service = req.body;
-        console.log(service);
-        servicesCollection.insertOne(service)
-            .then((result) => {
-                res.send(result.insertedCount > 0)
-            })
-
     })
 
     // read all services data from database
