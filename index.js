@@ -2,7 +2,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectID;
 require('dotenv').config();
+
 
 const fileUpload = require('express-fileupload');
 
@@ -22,6 +24,7 @@ app.get('/', (req, res) => {
 })
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
 client.connect(err => {
     const orderCollection = client.db("creativeAgencyDB").collection("orders");
     const reviewCollection = client.db("creativeAgencyDB").collection("reviews");
@@ -41,17 +44,18 @@ client.connect(err => {
         const serviceName = req.body.serviceName;
         const details = req.body.details;
         const price = req.body.price;
+        const status = req.body.status;
 
         const newImg = file.data;
         const encImg = newImg.toString('base64');
 
-        var image = {
+        var orderImg = {
             contentType: file.mimetype,
             size: file.size,
             img: Buffer.from(encImg, 'base64')
         };
 
-        orderCollection.insertOne({ name, email, image, serviceName, details, price })
+        orderCollection.insertOne({ name, email, serviceName, details, price, status, orderImg })
             .then((result) => {
                 res.send(result.insertedCount > 0)
                 console.log('order added', result);
@@ -68,13 +72,13 @@ client.connect(err => {
         const newImg = file.data;
         const encImg = newImg.toString('base64');
 
-        var serviceImg = {
+        var image = {
             contentType: file.mimetype,
             size: file.size,
             img: Buffer.from(encImg, 'base64')
         }
 
-        servicesCollection.insertOne({ title, description, serviceImg })
+        servicesCollection.insertOne({ title, description, image })
             .then((result) => {
                 res.send(result.insertedCount > 0)
                 console.log('service added', result);
@@ -133,6 +137,35 @@ client.connect(err => {
         adminCollection.find({ email: email })
             .toArray((err, adminEmail) => {
                 res.send(adminEmail.length > 0)
+            })
+    })
+
+    // find specific user order
+    app.get('/specificOrder', (req, res) => {
+        orderCollection.find({ email: req.query.email })
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+
+
+    // update order status
+    app.patch('/update/:id', (req, res) => {
+        orderCollection.updateOne({ _id: ObjectId(req.params.id) },
+            {
+                $set: { status: req.body.status }
+            })
+            .then((result) => {
+                res.send(result.modifiedCount > 0)
+            })
+    })
+
+    // Admin Login
+    app.get('/admin', (req, res) => {
+        const email = req.query.email;
+        adminCollection.find({ email })
+            .toArray((err, documents) => {
+                res.send(documents)
             })
     })
 
