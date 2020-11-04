@@ -45,7 +45,7 @@ client.connect(err => {
         const details = req.body.details;
         const price = req.body.price;
         const status = req.body.status;
-
+        const date = new Date().toDateString();
         const newImg = file.data;
         const encImg = newImg.toString('base64');
 
@@ -55,7 +55,7 @@ client.connect(err => {
             img: Buffer.from(encImg, 'base64')
         };
 
-        orderCollection.insertOne({ name, email, serviceName, details, price, status, orderImg })
+        orderCollection.insertOne({ name, email, serviceName, details, price, status, orderImg, date })
             .then((result) => {
                 res.send(result.insertedCount > 0)
                 console.log('order added', result);
