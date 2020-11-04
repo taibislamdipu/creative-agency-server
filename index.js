@@ -160,16 +160,6 @@ client.connect(err => {
             })
     })
 
-    // Admin Login
-    // app.get('/admin', (req, res) => {
-    //     const email = req.query.email;
-    //     adminCollection.find({ email })
-    //         .toArray((err, documents) => {
-    //             res.send(documents)
-    //         })
-    // })
-
-
 });
 
 app.listen(process.env.PORT || port, console.log('Database Running on Port', port))
